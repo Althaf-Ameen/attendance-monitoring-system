@@ -1,0 +1,168 @@
+<!doctype html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Attendance Monitoring System{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --sidebar-bg: #1e293b;
+      --sidebar-text: #94a3b8;
+      --sidebar-hover: #334155;
+      --body-bg: #f1f5f9;
+    }
+
+    /* Base */
+    body { background: var(--body-bg); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px; min-height: 100vh; background: var(--sidebar-bg);
+      position: fixed; top: 0; left: 0; display: flex; flex-direction: column; z-index: 100;
+      animation: slideInLeft 0.4s ease;
+    }
+    @keyframes slideInLeft { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    .sidebar-brand {
+      padding: 1.5rem 1.25rem 1rem; color: #fff; font-size: 0.95rem; font-weight: 700;
+      border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 10px; line-height: 1.3;
+    }
+    .sidebar-brand i { color: var(--primary); font-size: 1.5rem; flex-shrink: 0; }
+    .sidebar nav { padding: 1rem 0; flex: 1; }
+    .sidebar .nav-link {
+      color: var(--sidebar-text); padding: 0.7rem 1.25rem; display: flex;
+      align-items: center; gap: 10px; font-size: 0.92rem;
+      transition: background 0.2s, color 0.2s, padding-left 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .sidebar .nav-link:hover { background: var(--sidebar-hover); color: #fff; padding-left: 1.5rem; }
+    .sidebar .nav-link.active { background: rgba(37,99,235,0.15); color: #fff; border-left-color: var(--primary); }
+    .sidebar .nav-link i { font-size: 1.1rem; width: 20px; }
+    .sidebar-footer { padding: 1rem 1.25rem; border-top: 1px solid #334155; }
+    .sidebar-footer .nav-link { color: #ef4444; padding: 0.5rem 0; transition: color 0.2s; }
+    .sidebar-footer .nav-link:hover { color: #dc2626; background: transparent; padding-left: 0.25rem; }
+
+    /* Main */
+    .main-content { margin-left: 260px; padding: 2rem; min-height: 100vh; }
+    .page-header { margin-bottom: 1.5rem; animation: fadeInDown 0.4s ease; }
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+    .page-header h2 { font-size: 1.4rem; font-weight: 700; color: #1e293b; margin: 0; }
+    .page-header p { color: #64748b; margin: 0; font-size: 0.9rem; }
+
+    /* Cards */
+    .card {
+      border: none; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      animation: fadeInUp 0.45s ease both;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    .card-header {
+      background: #fff; border-bottom: 1px solid #e2e8f0;
+      border-radius: 12px 12px 0 0 !important; padding: 1rem 1.25rem;
+      font-weight: 600; color: #1e293b;
+    }
+
+    /* Stat cards */
+    .stat-card { transition: transform 0.2s, box-shadow 0.2s; }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.1) !important; }
+
+    /* Buttons */
+    .btn { transition: transform 0.15s, box-shadow 0.15s; }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+    .btn:active { transform: translateY(0); }
+
+    /* Form controls */
+    .form-control, .form-select {
+      border-radius: 8px; border: 1.5px solid #e2e8f0;
+      padding: 0.6rem 0.85rem; font-size: 0.9rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+    }
+
+    /* Required star */
+    .req { color: #ef4444; margin-left: 3px; }
+
+    /* Table rows */
+    tbody tr { transition: background 0.15s; }
+
+    /* Toast */
+    .toast-container { z-index: 9999; }
+    .toast { animation: slideInRight 0.35s ease; }
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+
+    /* Stagger card animations */
+    .card:nth-child(1) { animation-delay: 0.05s; }
+    .card:nth-child(2) { animation-delay: 0.1s; }
+    .card:nth-child(3) { animation-delay: 0.15s; }
+
+    @media (max-width: 768px) {
+      .sidebar { width: 60px; }
+      .sidebar-brand span, .sidebar .nav-link span { display: none; }
+      .main-content { margin-left: 60px; padding: 1rem; }
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <i class="bi bi-mortarboard-fill"></i>
+      <span>Attendance Monitoring System</span>
+    </div>
+    <nav>
+      <a class="nav-link {% block nav_home %}{% endblock %}" href="{% url 'dashboard' %}">
+        <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+      </a>
+      <a class="nav-link {% block nav_add %}{% endblock %}" href="{% url 'create_student' %}">
+        <i class="bi bi-person-plus"></i><span>Add Student</span>
+      </a>
+      <a class="nav-link {% block nav_list %}{% endblock %}" href="{% url 'students_list' %}">
+        <i class="bi bi-people"></i><span>Students</span>
+      </a>
+      <a class="nav-link {% block nav_attendance %}{% endblock %}" href="{% url 'attendence' %}">
+        <i class="bi bi-calendar-check"></i><span>Attendance</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a class="nav-link d-flex align-items-center gap-2" href="{% url 'signout' %}">
+        <i class="bi bi-box-arrow-left"></i><span>Log Out</span>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    {% if messages %}
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+      {% for message in messages %}
+      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert">
+        <div class="d-flex">
+          <div class="toast-body">{{ message }}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% block body %}{% endblock %}
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+  <script>
+    document.querySelectorAll('.toast').forEach(el => {
+      new bootstrap.Toast(el, { delay: 4000 }).show();
+    });
+  </script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

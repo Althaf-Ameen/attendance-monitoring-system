@@ -1,0 +1,123 @@
+{% extends 'home.html' %}
+{% block title %}Edit Student{% endblock %}
+{% block nav_list %}active{% endblock %}
+
+{% block body %}
+<div class="page-header">
+  <h2>Edit Student</h2>
+  <p>Update details for {{ get_id.name }}</p>
+</div>
+
+<div class="card" style="max-width:780px;">
+  <div class="card-header"><i class="bi bi-pencil me-2"></i>Edit Details</div>
+  <div class="card-body p-4">
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-3">
+
+        <div class="col-md-6">
+          <label class="form-label fw-500">Full Name <span class="req">*</span></label>
+          <input type="text" class="form-control" name="name" value="{{ get_id.name }}" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-500">Course <span class="req">*</span></label>
+          <input type="text" class="form-control" name="course" value="{{ get_id.course }}" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-500">Age <span class="req">*</span></label>
+          <input type="number" class="form-control" name="age" value="{{ get_id.age }}" min="1" max="100" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-500">Date of Birth <span class="req">*</span></label>
+          <input type="date" class="form-control" name="dob" value="{{ get_id.dob }}" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-500">Date of Joining <span class="req">*</span></label>
+          <input type="date" class="form-control" name="doj" value="{{ get_id.doj }}" required>
+        </div>
+
+        <!-- Country -->
+        <div class="col-md-6">
+          <label class="form-label fw-500">Country <span class="req">*</span></label>
+          <select class="form-select" name="country" id="countrySelect" required>
+            <option value="">Select Country</option>
+          </select>
+        </div>
+
+        <!-- State -->
+        <div class="col-md-6">
+          <label class="form-label fw-500">State <span class="req">*</span></label>
+          <select class="form-select" name="state" id="stateSelect" required>
+            <option value="">Select State</option>
+          </select>
+        </div>
+
+        <!-- City -->
+        <div class="col-md-6">
+          <label class="form-label fw-500">City <span class="req">*</span></label>
+          <input type="text" class="form-control" name="city" value="{{ get_id.city }}" required>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label fw-500">Address <span class="req">*</span></label>
+          <textarea class="form-control" name="address" rows="3" required>{{ get_id.address }}</textarea>
+        </div>
+
+      </div>
+
+      <div class="d-flex gap-2 mt-4">
+        <button type="submit" class="btn btn-primary px-4">
+          <i class="bi bi-check-lg me-1"></i>Save Changes
+        </button>
+        <a href="{% url 'students_list' %}" class="btn btn-outline-secondary px-4">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const countrySelect   = document.getElementById('countrySelect');
+  const stateSelect     = document.getElementById('stateSelect');
+  const savedCountry    = "{{ get_id.country }}";
+  const savedState      = "{{ get_id.state }}";
+
+  fetch('https://countriesnow.space/api/v0.1/countries/states')
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) return;
+      const countries = data.data.sort((a, b) => a.name.localeCompare(b.name));
+      window._countriesData = countries;
+
+      countries.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.name;
+        opt.textContent = c.name;
+        if (c.name === savedCountry) opt.selected = true;
+        countrySelect.appendChild(opt);
+      });
+
+      // Pre-fill states for saved country
+      if (savedCountry) populateStates(savedCountry, savedState);
+    });
+
+  function populateStates(countryName, preselectState = '') {
+    stateSelect.innerHTML = '<option value="">Select State</option>';
+    const country = window._countriesData.find(c => c.name === countryName);
+    if (country && country.states && country.states.length > 0) {
+      country.states.sort((a, b) => a.name.localeCompare(b.name)).forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.name;
+        opt.textContent = s.name;
+        if (s.name === preselectState) opt.selected = true;
+        stateSelect.appendChild(opt);
+      });
+    }
+  }
+
+  countrySelect.addEventListener('change', function () {
+    populateStates(this.value);
+  });
+</script>
+{% endblock %}

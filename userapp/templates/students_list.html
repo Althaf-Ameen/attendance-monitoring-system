@@ -1,0 +1,74 @@
+{% extends 'home.html' %}
+{% block title %}Students — Student Management{% endblock %}
+{% block nav_list %}active{% endblock %}
+
+{% block body %}
+<div class="page-header d-flex align-items-center justify-content-between">
+  <div>
+    <h2>Students</h2>
+    <p>All enrolled students</p>
+  </div>
+  <a href="{% url 'create_student' %}" class="btn btn-primary btn-sm">
+    <i class="bi bi-person-plus me-1"></i>Add Student
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0" id="studentsTable">
+        <thead style="background:#f8fafc;">
+          <tr>
+            <th class="ps-4">Name</th>
+            <th>Course</th>
+            <th>Age</th>
+            <th>Date of Birth</th>
+            <th>Date of Joining</th>
+            <th>City</th>
+            <th>State</th>
+            <th>Country</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in student %}
+          <tr>
+            <td class="ps-4 fw-500">{{ i.name }}</td>
+            <td><span class="badge" style="background:#eff6ff;color:#2563eb;font-weight:500;">{{ i.course }}</span></td>
+            <td>{{ i.age }}</td>
+            <td>{{ i.dob }}</td>
+            <td>{{ i.doj }}</td>
+            <td>{{ i.city }}</td>
+            <td>{{ i.state }}</td>
+            <td>{{ i.country }}</td>
+            <td class="text-center">
+              <a href="{% url 'edit_student' i.id %}" class="btn btn-sm btn-outline-primary me-1">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <a href="{% url 'delete_student' i.id %}"
+                 onclick="return confirm('Delete {{ i.name }}? This cannot be undone.')"
+                 class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-trash"></i>
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="9" class="text-center py-5 text-muted">
+              <i class="bi bi-people" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>
+              No students yet. <a href="{% url 'create_student' %}">Add the first one.</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  $('#studentsTable').DataTable({ pageLength: 10, language: { search: "Search students:" } });
+</script>
+{% endblock %}
