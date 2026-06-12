@@ -1,4 +1,4 @@
-![Attendace Banner](Attendance_Monitoring _System.png)
+![Attendance Banner](Attendance.png)
 # Attendance Monitoring System - Student Attendance Management Web App
 
 A Django-based web application for managing and monitoring student attendance
