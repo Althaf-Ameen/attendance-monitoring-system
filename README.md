@@ -1,4 +1,4 @@
-![GuideMate Banner](Attendance_Monitoring _system.png)
+![GuideMate Banner](Attendance_Monitoring _System.png)
 # Attendance Monitoring System - Student Attendance Management Web App
 
 A Django-based web application for managing and monitoring student attendance
